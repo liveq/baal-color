@@ -278,7 +278,8 @@
 
     <!-- 도구 버튼 -->
     <div class="tools-toggle">
-        <button id="toolsToggle" data-ko="더 많은 도구" data-en="More Tools">
+        <button id="toolsToggle">
+            <span class="tooltip" data-ko="더 많은 도구" data-en="More Tools"></span>
             🧰
         </button>
     </div>
@@ -293,25 +294,25 @@
         <main>
             <!-- 색상 미리보기 -->
             <div class="color-preview" id="colorPreview">
-                #FF5733
+                #d4af37
             </div>
 
             <!-- 색상 입력 -->
             <div class="color-inputs">
                 <div class="color-picker-wrapper">
-                    <input type="color" id="colorPicker" value="#FF5733">
+                    <input type="color" id="colorPicker" value="#d4af37">
                     <span data-ko="색상 피커로 선택" data-en="Pick a color">색상 피커로 선택</span>
                 </div>
 
                 <div class="input-group">
                     <label>HEX:</label>
-                    <input type="text" id="hexInput" value="#FF5733" placeholder="#RRGGBB">
+                    <input type="text" id="hexInput" value="#d4af37" placeholder="#RRGGBB">
                     <button class="copy-btn" onclick="copyToClipboard('hex')" data-ko="복사" data-en="Copy">복사</button>
                 </div>
 
                 <div class="input-group">
                     <label>RGB:</label>
-                    <input type="text" id="rgbInput" value="rgb(255, 87, 51)" placeholder="rgb(R, G, B)" readonly>
+                    <input type="text" id="rgbInput" value="rgb(212, 175, 55)" placeholder="rgb(R, G, B)" readonly>
                     <button class="copy-btn" onclick="copyToClipboard('rgb')" data-ko="복사" data-en="Copy">복사</button>
                 </div>
 
@@ -639,7 +640,7 @@
         });
 
         // Initialize
-        updateColor('#FF5733');
+        updateColor('#d4af37');
         updateHistoryDisplay();
     </script>
 </body>
