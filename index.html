@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="HEX, RGB, HSL 색상 코드 변환기. 색상 팔레트 생성 및 WCAG 접근성 검사 지원">
+    <meta name="keywords" content="색상 변환기, HEX RGB 변환, 컬러 피커, RGB to HEX, HEX to RGB, 색상 팔레트, Color Converter">
+    <meta name="author" content="BAAL">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://color.baal.co.kr/">
+    <meta property="og:title" content="색상 변환기 - BAAL">
+    <meta property="og:description" content="HEX, RGB, HSL 색상 코드 변환기. 색상 팔레트 생성 및 WCAG 접근성 검사 지원">
+    <meta property="og:image" content="https://color.baal.co.kr/og-image.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://color.baal.co.kr/">
+    <meta property="twitter:title" content="색상 변환기 - BAAL">
+    <meta property="twitter:description" content="HEX, RGB, HSL 색상 코드 변환기. 색상 팔레트 생성 및 WCAG 접근성 검사 지원">
+    <meta property="twitter:image" content="https://color.baal.co.kr/og-image.png">
+
+    <title>색상 변환기 - BAAL</title>
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2886185075996969"
+     crossorigin="anonymous"></script>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+    </script>
+
+    <!-- 공통 스타일 -->
+    <link rel="stylesheet" href="_common/common.css">
+    <style>
+        .color-preview {
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .color-inputs {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-group label {
+            min-width: 60px;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+        }
+
+        .copy-btn {
+            padding: 12px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-picker-wrapper input[type="color"] {
+            width: 60px;
+            height: 60px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .palette-section {
+            margin-top: 30px;
+        }
+
+        .palette-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .palette-btn {
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .palette-btn:hover,
+        .palette-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .palette-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .palette-color {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow-sm);
+            padding: 10px;
+        }
+
+        .palette-color:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .palette-color span {
+            font-size: 0.85em;
+            font-weight: 600;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+        }
+
+        .accessibility-section {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .contrast-check {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .contrast-check .rating {
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        .rating.aaa {
+            background: #22c55e;
+            color: white;
+        }
+
+        .rating.aa {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .rating.fail {
+            background: #ef4444;
+            color: white;
+        }
+
+        .history-section {
+            margin-top: 30px;
+        }
+
+        .history-colors {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .history-color {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow-sm);
+            border: 2px solid var(--border-color);
+        }
+
+        .history-color:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-md);
+        }
+
+        @media (max-width: 768px) {
+            .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .input-group label {
+                min-width: auto;
+            }
+
+            .palette-buttons {
+                justify-content: center;
+            }
+
+            .palette-display {
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 다크모드 토글 -->
+    <div class="theme-toggle">
+        <button id="themeToggle" aria-label="다크모드 전환">
+            <span class="icon-light">☀️</span>
+            <span class="icon-dark">🌙</span>
+        </button>
+    </div>
+
+    <!-- 언어 전환 -->
+    <div class="lang-toggle">
+        <button id="langToggle" data-lang="ko">
+            <span class="lang-ko">EN</span>
+            <span class="lang-en">KO</span>
+        </button>
+    </div>
+
+    <!-- 도구 버튼 -->
+    <div class="tools-toggle">
+        <button id="toolsToggle" data-ko="더 많은 도구" data-en="More Tools">
+            🧰
+        </button>
+    </div>
+
+    <!-- 메인 컨테이너 -->
+    <div class="container">
+        <header>
+            <h1 data-ko="색상 변환기" data-en="Color Converter">색상 변환기</h1>
+            <p class="subtitle" data-ko="HEX, RGB, HSL 변환 및 팔레트 생성" data-en="HEX, RGB, HSL conversion and palette generation">HEX, RGB, HSL 변환 및 팔레트 생성</p>
+        </header>
+
+        <main>
+            <!-- 색상 미리보기 -->
+            <div class="color-preview" id="colorPreview">
+                #FF5733
+            </div>
+
+            <!-- 색상 입력 -->
+            <div class="color-inputs">
+                <div class="color-picker-wrapper">
+                    <input type="color" id="colorPicker" value="#FF5733">
+                    <span data-ko="색상 피커로 선택" data-en="Pick a color">색상 피커로 선택</span>
+                </div>
+
+                <div class="input-group">
+                    <label>HEX:</label>
+                    <input type="text" id="hexInput" value="#FF5733" placeholder="#RRGGBB">
+                    <button class="copy-btn" onclick="copyToClipboard('hex')" data-ko="복사" data-en="Copy">복사</button>
+                </div>
+
+                <div class="input-group">
+                    <label>RGB:</label>
+                    <input type="text" id="rgbInput" value="rgb(255, 87, 51)" placeholder="rgb(R, G, B)" readonly>
+                    <button class="copy-btn" onclick="copyToClipboard('rgb')" data-ko="복사" data-en="Copy">복사</button>
+                </div>
+
+                <div class="input-group">
+                    <label>HSL:</label>
+                    <input type="text" id="hslInput" value="hsl(14°, 100%, 60%)" placeholder="hsl(H°, S%, L%)" readonly>
+                    <button class="copy-btn" onclick="copyToClipboard('hsl')" data-ko="복사" data-en="Copy">복사</button>
+                </div>
+            </div>
+
+            <!-- 팔레트 생성 -->
+            <div class="palette-section">
+                <h2 data-ko="팔레트 생성" data-en="Generate Palette">팔레트 생성</h2>
+                <div class="palette-buttons">
+                    <button class="palette-btn" onclick="generatePalette('analogous')" data-ko="유사색" data-en="Analogous">유사색</button>
+                    <button class="palette-btn" onclick="generatePalette('complementary')" data-ko="보색" data-en="Complementary">보색</button>
+                    <button class="palette-btn" onclick="generatePalette('triadic')" data-ko="삼각색" data-en="Triadic">삼각색</button>
+                    <button class="palette-btn" onclick="generatePalette('tetradic')" data-ko="사각색" data-en="Tetradic">사각색</button>
+                    <button class="palette-btn" onclick="generatePalette('monochromatic')" data-ko="단색" data-en="Monochromatic">단색</button>
+                </div>
+                <div class="palette-display" id="paletteDisplay"></div>
+            </div>
+
+            <!-- WCAG 접근성 -->
+            <div class="accessibility-section">
+                <h2 data-ko="WCAG 접근성 대비" data-en="WCAG Contrast">WCAG 접근성 대비</h2>
+                <div class="contrast-check">
+                    <span data-ko="흰색 텍스트" data-en="White text">흰색 텍스트</span>
+                    <span class="rating" id="whiteRating">AA</span>
+                </div>
+                <div class="contrast-check">
+                    <span data-ko="검은색 텍스트" data-en="Black text">검은색 텍스트</span>
+                    <span class="rating" id="blackRating">AAA</span>
+                </div>
+            </div>
+
+            <!-- 최근 사용 색상 -->
+            <div class="history-section">
+                <h2 data-ko="최근 사용 색상" data-en="Recent Colors">최근 사용 색상</h2>
+                <div class="history-colors" id="historyColors"></div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <p class="footer-brand">
+                    Made by <a href="https://baal.co.kr" target="_blank">BAAL</a>
+                </p>
+                <p class="footer-contact">
+                    <a href="mailto:baal.contract@gmail.com">baal.contract@gmail.com</a>
+                </p>
+                <p class="footer-links">
+                    <a href="https://baal.co.kr/privacy" target="_blank" data-ko="개인정보처리방침" data-en="Privacy Policy">개인정보처리방침</a>
+                    <span class="separator">|</span>
+                    <a href="https://baal.co.kr/terms" target="_blank" data-ko="이용약관" data-en="Terms of Service">이용약관</a>
+                </p>
+                <p class="footer-copyright">&copy; 2025 BAAL. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 공통 스크립트 -->
+    <script src="_common/common.js"></script>
+    <script>
+        // Color conversion functions
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+
+            return {
+                h: Math.round(h * 360),
+                s: Math.round(s * 100),
+                l: Math.round(l * 100)
+            };
+        }
+
+        function hslToRgb(h, s, l) {
+            h /= 360;
+            s /= 100;
+            l /= 100;
+
+            let r, g, b;
+
+            if (s === 0) {
+                r = g = b = l;
+            } else {
+                const hue2rgb = (p, q, t) => {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                };
+
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+
+            return {
+                r: Math.round(r * 255),
+                g: Math.round(g * 255),
+                b: Math.round(b * 255)
+            };
+        }
+
+        function validateHex(hex) {
+            if (!hex.startsWith('#')) {
+                hex = '#' + hex;
+            }
+
+            if (/^#[0-9A-F]{3}$/i.test(hex)) {
+                hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+            }
+
+            if (!/^#[0-9A-F]{6}$/i.test(hex)) {
+                return null;
+            }
+
+            return hex.toUpperCase();
+        }
+
+        // WCAG contrast functions
+        function getLuminance(r, g, b) {
+            const [rs, gs, bs] = [r, g, b].map(val => {
+                val /= 255;
+                return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
+            });
+            return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+        }
+
+        function getContrastRatio(hex1, hex2) {
+            const rgb1 = hexToRgb(hex1);
+            const rgb2 = hexToRgb(hex2);
+            const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
+            const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
+
+            const lighter = Math.max(lum1, lum2);
+            const darker = Math.min(lum1, lum2);
+
+            return (lighter + 0.05) / (darker + 0.05);
+        }
+
+        function getAccessibilityRating(ratio) {
+            if (ratio >= 7) return 'AAA';
+            if (ratio >= 4.5) return 'AA';
+            return 'Fail';
+        }
+
+        // Update color display
+        function updateColor(hex) {
+            hex = validateHex(hex);
+            if (!hex) return;
+
+            const rgb = hexToRgb(hex);
+            const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+
+            document.getElementById('colorPreview').style.backgroundColor = hex;
+            document.getElementById('colorPreview').textContent = hex;
+            document.getElementById('hexInput').value = hex;
+            document.getElementById('rgbInput').value = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            document.getElementById('hslInput').value = `hsl(${hsl.h}°, ${hsl.s}%, ${hsl.l}%)`;
+            document.getElementById('colorPicker').value = hex;
+
+            // Update WCAG contrast
+            const whiteRatio = getContrastRatio(hex, '#FFFFFF');
+            const blackRatio = getContrastRatio(hex, '#000000');
+
+            const whiteRating = getAccessibilityRating(whiteRatio);
+            const blackRating = getAccessibilityRating(blackRatio);
+
+            const whiteEl = document.getElementById('whiteRating');
+            const blackEl = document.getElementById('blackRating');
+
+            whiteEl.textContent = `${whiteRating} (${whiteRatio.toFixed(1)}:1)`;
+            whiteEl.className = 'rating ' + whiteRating.toLowerCase();
+
+            blackEl.textContent = `${blackRating} (${blackRatio.toFixed(1)}:1)`;
+            blackEl.className = 'rating ' + blackRating.toLowerCase();
+
+            // Add to history
+            addToHistory(hex);
+        }
+
+        // Palette generation
+        function generatePalette(type) {
+            const hex = document.getElementById('hexInput').value;
+            const rgb = hexToRgb(hex);
+            const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+            const baseHue = hsl.h;
+            let colors = [];
+
+            switch (type) {
+                case 'analogous':
+                    colors = [
+                        hslToRgb(baseHue, 80, 60),
+                        hslToRgb((baseHue + 30) % 360, 80, 50),
+                        hslToRgb(baseHue, 80, 40),
+                        hslToRgb((baseHue - 30 + 360) % 360, 80, 70),
+                        hslToRgb((baseHue - 30 + 360) % 360, 80, 50)
+                    ];
+                    break;
+                case 'complementary':
+                    colors = [
+                        hslToRgb(baseHue, 80, 60),
+                        hslToRgb((baseHue + 180) % 360, 80, 60),
+                        hslToRgb(baseHue, 60, 50),
+                        hslToRgb((baseHue + 180) % 360, 60, 50),
+                        hslToRgb(baseHue, 90, 70)
+                    ];
+                    break;
+                case 'triadic':
+                    colors = [
+                        hslToRgb(baseHue, 80, 60),
+                        hslToRgb((baseHue + 120) % 360, 80, 60),
+                        hslToRgb((baseHue + 240) % 360, 80, 60),
+                        hslToRgb(baseHue, 60, 50),
+                        hslToRgb((baseHue + 120) % 360, 60, 50)
+                    ];
+                    break;
+                case 'tetradic':
+                    colors = [
+                        hslToRgb(baseHue, 80, 60),
+                        hslToRgb((baseHue + 90) % 360, 80, 60),
+                        hslToRgb((baseHue + 180) % 360, 80, 60),
+                        hslToRgb((baseHue + 270) % 360, 80, 60),
+                        hslToRgb(baseHue, 60, 50)
+                    ];
+                    break;
+                case 'monochromatic':
+                    colors = [
+                        hslToRgb(baseHue, hsl.s, 80),
+                        hslToRgb(baseHue, hsl.s, 60),
+                        hslToRgb(baseHue, hsl.s, 40),
+                        hslToRgb(baseHue, hsl.s, 20),
+                        hslToRgb(baseHue, hsl.s, 10)
+                    ];
+                    break;
+            }
+
+            const paletteDisplay = document.getElementById('paletteDisplay');
+            paletteDisplay.innerHTML = colors.map(rgb => {
+                const colorHex = rgbToHex(rgb.r, rgb.g, rgb.b);
+                return `<div class="palette-color" style="background: ${colorHex}" onclick="updateColor('${colorHex}')">
+                    <span>${colorHex}</span>
+                </div>`;
+            }).join('');
+
+            // Update active button
+            document.querySelectorAll('.palette-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // History management
+        function addToHistory(hex) {
+            let history = JSON.parse(localStorage.getItem('colorHistory') || '[]');
+            history = history.filter(h => h !== hex);
+            history.unshift(hex);
+            history = history.slice(0, 10);
+            localStorage.setItem('colorHistory', JSON.stringify(history));
+            updateHistoryDisplay();
+        }
+
+        function updateHistoryDisplay() {
+            const history = JSON.parse(localStorage.getItem('colorHistory') || '[]');
+            const historyEl = document.getElementById('historyColors');
+            historyEl.innerHTML = history.map(hex =>
+                `<div class="history-color" style="background: ${hex}" onclick="updateColor('${hex}')" title="${hex}"></div>`
+            ).join('');
+        }
+
+        // Copy to clipboard
+        function copyToClipboard(type) {
+            const input = document.getElementById(type + 'Input');
+            input.select();
+            document.execCommand('copy');
+
+            const lang = document.body.getAttribute('data-lang') || 'ko';
+            const message = lang === 'ko' ? '복사되었습니다!' : 'Copied!';
+            alert(message);
+        }
+
+        // Event listeners
+        document.getElementById('colorPicker').addEventListener('input', (e) => {
+            updateColor(e.target.value);
+        });
+
+        document.getElementById('hexInput').addEventListener('input', (e) => {
+            updateColor(e.target.value);
+        });
+
+        // Initialize
+        updateColor('#FF5733');
+        updateHistoryDisplay();
+    </script>
+</body>
+</html>
